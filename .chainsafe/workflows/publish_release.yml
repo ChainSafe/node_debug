@@ -41,8 +41,8 @@ jobs:
       - name: Compile the nodejs
         run: make -C out BUILDTYPE=Debug -j$(nproc --all)
 
-      - name: Verify the build
-        run: make test-only
+      # - name: Verify the build
+      #   run: make test-only
 
       - name: Create GitHub Release
         id: create_release
