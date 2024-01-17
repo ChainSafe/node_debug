@@ -1,6 +1,8 @@
 # ChainSafe Node.js Debug Builds
 
-This repo is built to follow the upstream nodejs/node repo.  Do not make any changes to code in this repo as it is designed to reset --hard to upstream so it is identical.  There is only one disparate branch and that is `chainsafe` which is used to hold assets that get copied in to keep the repo in sync.  There are only two workflows that are maintained here and the rest of the workflows from upstream are deleted to keep down CI costs and noise.  All validation is done by the upstream repo.
+This repo is built to follow the upstream nodejs/node repo.  The goal of this is to build and host Debug builds of node in the releases so that they can be pulled and installed by CI in Lodestar.  Our fork of `actions/setup-node` points at this repo for the hosted binaries.
+
+Do not make any changes to code in this repo as it is designed to reset --hard to upstream so it is identical.  There is only one disparate branch and that is `chainsafe` which is used to hold assets that get copied in to keep the repo in sync.  There are only two workflows that are maintained here and the rest of the workflows from upstream are deleted to keep down CI costs and noise.  All validation is done by the upstream repo.
 
 ### Workflows
 
