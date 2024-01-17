@@ -1,5 +1,8 @@
 name: Build and Release Debug Node.js
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
@@ -13,12 +16,10 @@ on:
 jobs:
   build-liunx:
     name: Build Debug version of Node.js
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: buildjet-16vcpu-ubuntu-2204
     strategy:
       fail-fast: false
     steps:
-      - name: Install dependencies
-        run: sudo apt-get install python3 g++ make python3-pip
 
       - name: Set version env
         run: |
@@ -38,27 +39,26 @@ jobs:
       - name: Configure nodejs with debug flag
         run: ./configure --debug
 
-      - name: Compile the nodejs
+      - name: Compile a debug version of node
         run: make -C out BUILDTYPE=Debug -j$(nproc --all)
-
-      # - name: Verify the build
-      #   run: make test-only
+      
+      - name: Compress and move binary
+        run: |
+          cd out/Debug
+          tar -czf ../../node_debug.tar.gz node
 
       - name: Create GitHub Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          name: Debug Release ${{ env.VERSION }}
           tag_name: ${{ env.VERSION }}
-          release_name: Debug Release ${{ env.VERSION }}
+          body: |
+            Debug version of Node.js for use with actions/setup-node
           draft: false
           prerelease: false
-
-      - name: Upload Linux Debug Build to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: out/Debug/node
+          fail_on_unmatched_files: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: node_debug.tar.gz
