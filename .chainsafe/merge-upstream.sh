@@ -19,6 +19,8 @@ mkdir -p .github/scripts
 git checkout origin/chainsafe .chainsafe .chainsafe/workflows
 mv .chainsafe/workflows .github/workflows
 mv .chainsafe/merge-upstream.sh .github/scripts/merge-upstream.sh
+rm README.md
+mv .chainsafe/README.md README.md
 rm -rf .chainsafe
 git add -A
 git add -f .github
