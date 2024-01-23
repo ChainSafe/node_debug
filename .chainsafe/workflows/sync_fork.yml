@@ -1,28 +1,30 @@
 name: Sync Fork
 
+permissions:
+  actions: write
+
 on:
   workflow_dispatch:
   schedule:
     # Runs at 00:00, 06:00, 12:00, and 18:00 UTC
-    - cron:  '0 0,6,12,18 * * *'
+    - cron: "0 0,6,12,18 * * *"
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Git
+        run: |
+          git config --global user.name "matthewkeil"
+          git config --global user.email "me@matthewkeil.com"
 
-    - name: Set up Git
-      run: |
-        git config --global user.name "matthewkeil"
-        git config --global user.email "me@matthewkeil.com"
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-
-    - name: Sync with Upstream
-      shell: bash
-      run: |
-        chmod +x .github/scripts/merge-upstream.sh
-        ./.github/scripts/merge-upstream.sh
+      - name: Sync with Upstream
+        shell: bash
+        run: |
+          chmod +x .github/scripts/merge-upstream.sh
+          ./.github/scripts/merge-upstream.sh
