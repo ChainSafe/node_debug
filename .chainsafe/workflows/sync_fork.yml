@@ -1,6 +1,7 @@
 name: Sync Fork
 
 permissions:
+  contents: write
   actions: write
 
 on:
