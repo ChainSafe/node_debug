@@ -1,0 +1,64 @@
+name: Build and Release Debug Node.js
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+' # Push events to matching semver, i.e.v20.15.10
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        description: "Node.js version (wihtout the v)"
+
+jobs:
+  build-liunx:
+    name: Build Debug version of Node.js
+    runs-on: buildjet-16vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+    steps:
+
+      - name: Set version env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=v${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          else
+            VERSION_TAG=${GITHUB_REF#refs/tags/}
+            echo "VERSION=${VERSION_TAG}" >> $GITHUB_ENV
+          fi
+
+      - name: Download Node.js source
+        uses: actions/checkout@v4
+        with:
+          repository: "nodejs/node"
+          ref: ${{ env.VERSION }}
+
+      - name: Configure nodejs with debug flag
+        run: ./configure --debug
+
+      - name: Compile a debug version of node
+        run: make -C out BUILDTYPE=Debug -j$(nproc --all)
+      
+      - name: Compress and move binary
+        run: |
+          cd out/Debug
+          tar -czf ../../node_debug.tar.gz node
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Debug Release ${{ env.VERSION }}
+          tag_name: ${{ env.VERSION }}
+          body: |
+            Debug version of Node.js for use with actions/setup-node
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: node_debug.tar.gz
